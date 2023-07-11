@@ -110,8 +110,12 @@ public class DeShredder {
      * (Called by the "Rotate" button)
      */
     public void rotateList(){
-        /*# YOUR CODE HERE */
-
+        if (!allShreds.isEmpty()){
+            Shred firstLast = allShreds.get(0);
+            allShreds.remove(firstLast);
+            allShreds.add(firstLast);
+        }
+        display();
     }
 
     /**
