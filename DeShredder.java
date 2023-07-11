@@ -3,9 +3,9 @@
 // You may not distribute it in any other way without permission.
 
 /* Code for COMP103 - 2023T2, Assignment 1
- * Name:
- * Username:
- * ID:
+ * Name: Amy Booth
+ * Username: boothamy
+ * ID: 300653766
  */
 
 import ecs100.*;
@@ -93,7 +93,13 @@ public class DeShredder {
      * Each new Shred needs the directory and the number/id of the shred.
      */
     public void load(Path dir, int count) {
-        /*# YOUR CODE HERE */
+        allShreds.clear();
+        workingStrip.clear();
+        completedStrips.clear();
+        for (int shredId=1; shredId<=count; shredId++){
+            Shred shred = new Shred(dir, shredId);
+            allShreds.add(shred);
+        }
 
     }
 
