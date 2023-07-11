@@ -161,17 +161,7 @@ public class DeShredder {
             List<Shred> toStrip = getStrip(y); // the List of shreds to move to (possibly null)
             int toPosition = getColumn(x);     // the index to move the shred to (may be off the end)
             // perform the correct action, depending on the from/to strips/positions
-            if (fromStrip != null && toStrip != null && !fromStrip.isEmpty() && fromPosition < fromStrip.size()) {
-                // find the right shred (if it exists) and remove it from the old strip
-                Shred moving = fromStrip.get(fromPosition);
-                fromStrip.remove(moving);
-                if (toPosition >= toStrip.size()) { // if it's been moved to off the end of a strip,
-                    toStrip.add(moving); // put it at the end of the strip.
-                }
-                else {
-                    toStrip.add(toPosition, moving); // "move"/add shred to new location
-                }
-            }
+            moveShred(toStrip, toPosition);
             display();
         }
     }
@@ -179,6 +169,20 @@ public class DeShredder {
     // Additional methods to perform the different actions, called by doMouse
 
     /*# YOUR CODE HERE */
+
+    public void moveShred(List<Shred> toStrip, int toPos){
+        if (fromStrip != null && toStrip != null && !fromStrip.isEmpty() && fromPosition < fromStrip.size()) {
+            // find the right shred (if it exists) and remove it from the old strip
+            Shred moving = fromStrip.get(fromPosition);
+            fromStrip.remove(moving);
+            if (toPos >= toStrip.size()) { // if it's been moved to off the end of a strip,
+                toStrip.add(moving); // put it at the end of the strip.
+            }
+            else {
+                toStrip.add(toPos, moving); // "move"/add shred to new location
+            }
+        }
+    }
 
     //=============================================================================
     // Completed for you. Do not change.
