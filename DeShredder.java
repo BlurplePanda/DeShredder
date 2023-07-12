@@ -132,8 +132,8 @@ public class DeShredder {
      * (Called by the "Complete Strip" button)
      */
     public void completeStrip(){
-        /*# YOUR CODE HERE */
-
+        completedStrips.add(workingStrip);
+        workingStrip = new ArrayList<Shred>();
     }
 
     /**
