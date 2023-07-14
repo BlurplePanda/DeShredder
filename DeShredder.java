@@ -123,8 +123,13 @@ public class DeShredder {
      * and redisplay;
      */
     public void shuffleList(){
-
-
+        for (Shred shred : allShreds){
+            Random random = new Random();
+            int randIndex = random.nextInt(allShreds.size());
+            Shred replaced = allShreds.set(randIndex, shred);
+            allShreds.set(allShreds.indexOf(shred), replaced);
+        }
+        display();
     }
 
     /**
