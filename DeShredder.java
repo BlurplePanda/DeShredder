@@ -123,7 +123,7 @@ public class DeShredder {
      * and redisplay;
      */
     public void shuffleList(){
-        /*# YOUR CODE HERE */
+
 
     }
 
@@ -132,8 +132,11 @@ public class DeShredder {
      * (Called by the "Complete Strip" button)
      */
     public void completeStrip(){
-        completedStrips.add(workingStrip);
-        workingStrip = new ArrayList<Shred>();
+        if (!workingStrip.isEmpty()) {
+            completedStrips.add(workingStrip);
+            workingStrip = new ArrayList<Shred>();
+            display();
+        }
     }
 
     /**
@@ -161,7 +164,12 @@ public class DeShredder {
             List<Shred> toStrip = getStrip(y); // the List of shreds to move to (possibly null)
             int toPosition = getColumn(x);     // the index to move the shred to (may be off the end)
             // perform the correct action, depending on the from/to strips/positions
-            moveShred(toStrip, toPosition);
+            if (!completedStrips.contains(fromStrip) && !completedStrips.contains(toStrip)){
+                moveShred(toStrip, toPosition);
+            }
+            else if (completedStrips.contains(fromStrip) && toStrip!=allShreds){
+                moveStrip(toStrip);
+            }
             display();
         }
     }
@@ -181,6 +189,19 @@ public class DeShredder {
             else {
                 toStrip.add(toPos, moving); // "move"/add shred to new location
             }
+        }
+    }
+
+    public void moveStrip(List<Shred> toStrip){
+        if (toStrip == workingStrip && workingStrip.isEmpty()){
+            workingStrip.addAll(fromStrip);
+            completedStrips.remove(fromStrip);
+        }
+        else if (completedStrips.contains(toStrip)){
+            int fromIndex = completedStrips.indexOf(fromStrip);
+            int toIndex = completedStrips.indexOf(toStrip);
+            completedStrips.set(toIndex, fromStrip);
+            completedStrips.set(fromIndex, toStrip);
         }
     }
 
