@@ -75,14 +75,21 @@ public class DeShredder {
      * Calls load(...) to construct the List of all the Shreds
      */
     public void loadLibrary(){
-        Path filePath = Path.of(UIFileChooser.open("Choose first shred in directory"));
-        Path directory = filePath.getParent(); //subPath(0, filePath.getNameCount()-1);
-        int count=1;
-        while(Files.exists(directory.resolve(count+".png"))){ count++; }
-        //loop stops when count.png doesn't exist
-        count = count-1;
-        load(directory, count);   // YOU HAVE TO COMPLETE THE load METHOD
-        display();
+        try {
+            Path filePath = Path.of(UIFileChooser.open("Choose first shred in directory"));
+            Path directory = filePath.getParent(); //subPath(0, filePath.getNameCount()-1);
+            int count = 1;
+            while (Files.exists(directory.resolve(count + ".png"))) {
+                count++;
+            }
+            //loop stops when count.png doesn't exist
+            count = count - 1;
+            load(directory, count);   // YOU HAVE TO COMPLETE THE load METHOD
+            display();
+            UI.printMessage(""); // clears any "hey choose a file pls" messages
+        } catch (NullPointerException e){
+            UI.printMessage("Please choose a file in the directory you want!");
+        }
     }
 
     /**
