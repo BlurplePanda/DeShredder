@@ -53,6 +53,8 @@ public class DeShredder {
     private List<Shred> fromStrip;   // The strip (List of Shreds) that the user pressed on
     private int fromPosition = -1;   // index of shred in the strip
 
+    private Path directory;
+
     /**
      * Initialises the UI window, and sets up the buttons. 
      */
@@ -78,7 +80,7 @@ public class DeShredder {
     public void loadLibrary(){
         try {
             Path filePath = Path.of(UIFileChooser.open("Choose first shred in directory"));
-            Path directory = filePath.getParent(); //subPath(0, filePath.getNameCount()-1);
+            directory = filePath.getParent(); //subPath(0, filePath.getNameCount()-1);
             int count = 1;
             while (Files.exists(directory.resolve(count + ".png"))) {
                 count++;
@@ -220,7 +222,36 @@ public class DeShredder {
 
 
     public void save(){
+        int shredsInRow = completedStrips.get(0).size();
+        int fullNumRows = completedStrips.size()*(int)(Shred.SIZE);
+        int fullNumCols = shredsInRow * (int)(Shred.SIZE);
+        Color[][] fullImg = new Color[fullNumRows][fullNumCols];
 
+        for (int stripNum = 0; stripNum < completedStrips.size(); stripNum++){
+        //for (List<Shred> strip : completedStrips){
+            List<Shred> strip = completedStrips.get(stripNum);
+
+            // if the strip is a different length, stop
+            if (strip.size() != shredsInRow){
+                UI.println("Please ensure all strips are the same length!");
+                return;
+            }
+
+            for (int row=0; row<(int)(Shred.SIZE); row++) {
+                Color[] imgRow = new Color[fullNumCols];
+                for (int shred = 0; shred < strip.size(); shred++) {
+                    String shredName = strip.get(shred).toString().substring(3) + ".png";
+                    String file = directory.resolve(shredName).toString();
+                    Color[][] shredImg = loadImage(file);
+                    for (int col = 0; col < (int)(Shred.SIZE); col++) {
+                        imgRow[shred*(int)(Shred.SIZE)+col] = shredImg[row][col];
+                    }
+                }
+                fullImg[stripNum*(int)(Shred.SIZE)+row] = imgRow;
+            }
+        }
+        saveImage(fullImg, "test.png");
+        UI.println("Saved");
     }
 
     //=============================================================================
