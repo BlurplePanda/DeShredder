@@ -9,6 +9,7 @@
  */
 
 import ecs100.*;
+
 import java.awt.Color;
 import java.util.*;
 import java.io.*;
@@ -20,17 +21,16 @@ import java.awt.image.BufferedImage;
  * DeShredder allows a user to sort fragments of a shredded document ("shreds") into strips, and
  * then sort the strips into the original document.
  * The program shows
- *   - a list of all the shreds along the top of the window, 
- *   - the working strip (which the user is constructing) just below it.
- *   - the list of completed strips below the working strip.
+ * - a list of all the shreds along the top of the window,
+ * - the working strip (which the user is constructing) just below it.
+ * - the list of completed strips below the working strip.
  * The "rotate" button moves the first shred on the list to the end of the list to let the
- *  user see the shreds that have disappeared over the edge of the window.
+ * user see the shreds that have disappeared over the edge of the window.
  * The "shuffle" button reorders the shreds in the list randomly.
  * The user can use the mouse to drag shreds between the list at the top and the working strip,
- *  and move shreds around in the working strip to get them in order.
+ * and move shreds around in the working strip to get them in order.
  * When the user has the working strip complete, they can move
- *  the working strip down into the list of completed strips, and reorder the completed strips.
- *
+ * the working strip down into the list of completed strips, and reorder the completed strips.
  */
 public class DeShredder {
 
@@ -45,8 +45,8 @@ public class DeShredder {
     public static final double GAP = 5;         // gap between strips
     public static final double SIZE = Shred.SIZE; // size of the shreds
 
-    public static final double TOP_WORKING = TOP_ALL+SIZE+GAP;
-    public static final double TOP_STRIPS = TOP_WORKING+(SIZE+GAP);
+    public static final double TOP_WORKING = TOP_ALL + SIZE + GAP;
+    public static final double TOP_STRIPS = TOP_WORKING + (SIZE + GAP);
 
     //Fields for recording where the mouse was pressed  (which list/strip and position in list)
     // note, the position may be past the end of the list!
@@ -56,18 +56,18 @@ public class DeShredder {
     private Path directory;
 
     /**
-     * Initialises the UI window, and sets up the buttons. 
+     * Initialises the UI window, and sets up the buttons.
      */
     public void setupGUI() {
-        UI.addButton("Load library",   this::loadLibrary);
-        UI.addButton("Rotate",         this::rotateList);
-        UI.addButton("Shuffle",        this::shuffleList);
+        UI.addButton("Load library", this::loadLibrary);
+        UI.addButton("Rotate", this::rotateList);
+        UI.addButton("Shuffle", this::shuffleList);
         UI.addButton("Complete Strip", this::completeStrip);
-        UI.addButton("Save as PNG",    this::save);
-        UI.addButton("Quit",           UI::quit);
+        UI.addButton("Save as PNG", this::save);
+        UI.addButton("Quit", UI::quit);
 
         UI.setMouseListener(this::doMouse);
-        UI.setWindowSize(1000,800);
+        UI.setWindowSize(1000, 800);
         UI.setDivider(0);
     }
 
@@ -77,7 +77,7 @@ public class DeShredder {
      * and finds out how many images are in the library
      * Calls load(...) to construct the List of all the Shreds
      */
-    public void loadLibrary(){
+    public void loadLibrary() {
         try {
             Path filePath = Path.of(UIFileChooser.open("Choose first shred in directory"));
             directory = filePath.getParent(); //subPath(0, filePath.getNameCount()-1);
@@ -90,14 +90,14 @@ public class DeShredder {
             load(directory, count);   // YOU HAVE TO COMPLETE THE load METHOD
             display();
             UI.printMessage(""); // clears any "hey choose a file pls" messages
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             UI.printMessage("Please choose a file in the directory you want!");
         }
     }
 
     /**
      * Empties out all the current lists (the list of all shreds,
-     *  the working strip, and the completed strips).
+     * the working strip, and the completed strips).
      * Loads the library of shreds into the allShreds list.
      * Parameters are the directory containing the shred images and the number of shreds.
      * Each new Shred needs the directory and the number/id of the shred.
@@ -106,7 +106,7 @@ public class DeShredder {
         allShreds.clear();
         workingStrip.clear();
         completedStrips.clear();
-        for (int shredId=1; shredId<=count; shredId++){
+        for (int shredId = 1; shredId <= count; shredId++) {
             Shred shred = new Shred(dir, shredId);
             allShreds.add(shred);
         }
@@ -119,8 +119,8 @@ public class DeShredder {
      * Should not have an error if the list is empty
      * (Called by the "Rotate" button)
      */
-    public void rotateList(){
-        if (!allShreds.isEmpty()){
+    public void rotateList() {
+        if (!allShreds.isEmpty()) {
             Shred firstLast = allShreds.get(0);
             allShreds.remove(firstLast);
             allShreds.add(firstLast);
@@ -132,8 +132,8 @@ public class DeShredder {
      * Shuffle the list of all shreds into a random order
      * and redisplay;
      */
-    public void shuffleList(){
-        for (Shred shred : allShreds){
+    public void shuffleList() {
+        for (Shred shred : allShreds) {
             Random random = new Random();
             int randIndex = random.nextInt(allShreds.size());
             Shred replaced = allShreds.set(randIndex, shred);
@@ -146,43 +146,42 @@ public class DeShredder {
      * Move the current working strip to the end of the list of completed strips.
      * (Called by the "Complete Strip" button)
      */
-    public void completeStrip(){
+    public void completeStrip() {
         if (!workingStrip.isEmpty()) {
             completedStrips.add(workingStrip);
-            workingStrip = new ArrayList<Shred>();
+            workingStrip = new ArrayList<>();
             display();
         }
     }
 
     /**
      * Simple Mouse actions to move shreds and strips
-     *  User can
-     *  - move a Shred from allShreds to a position in the working strip
-     *  - move a Shred from the working strip back into allShreds
-     *  - move a Shred around within the working strip.
-     *  - move a completed Strip around within the list of completed strips
-     *  - move a completed Strip back to become the working strip
-     *    (but only if the working strip is currently empty)
+     * User can
+     * - move a Shred from allShreds to a position in the working strip
+     * - move a Shred from the working strip back into allShreds
+     * - move a Shred around within the working strip.
+     * - move a completed Strip around within the list of completed strips
+     * - move a completed Strip back to become the working strip
+     * (but only if the working strip is currently empty)
      * Moving a shred to a position past the end of a List should put it at the end.
      * You should create additional methods to do the different actions - do not attempt
-     *  to put all the code inside the doMouse method - you will lose style points for this.
+     * to put all the code inside the doMouse method - you will lose style points for this.
      * Attempting an invalid action should have no effect.
      * Note: doMouse uses getStrip and getColumn, which are written for you (at the end).
      * You should not change them.
      */
-    public void doMouse(String action, double x, double y){
-        if (action.equals("pressed")){
+    public void doMouse(String action, double x, double y) {
+        if (action.equals("pressed")) {
             fromStrip = getStrip(y);      // the List of shreds to move from (possibly null)
             fromPosition = getColumn(x);  // the index of the shred to move (may be off the end)
         }
-        if (action.equals("released")){
+        if (action.equals("released")) {
             List<Shred> toStrip = getStrip(y); // the List of shreds to move to (possibly null)
             int toPosition = getColumn(x);     // the index to move the shred to (may be off the end)
             // perform the correct action, depending on the from/to strips/positions
-            if (!completedStrips.contains(fromStrip) && !completedStrips.contains(toStrip)){
+            if (!completedStrips.contains(fromStrip) && !completedStrips.contains(toStrip)) {
                 moveShred(toStrip, toPosition);
-            }
-            else if (completedStrips.contains(fromStrip) && toStrip!=allShreds){
+            } else if (completedStrips.contains(fromStrip) && toStrip != allShreds) {
                 moveStrip(toStrip);
             }
             display();
@@ -193,26 +192,24 @@ public class DeShredder {
 
     /*# YOUR CODE HERE */
 
-    public void moveShred(List<Shred> toStrip, int toPos){
+    public void moveShred(List<Shred> toStrip, int toPos) {
         if (fromStrip != null && toStrip != null && !fromStrip.isEmpty() && fromPosition < fromStrip.size()) {
             // find the right shred (if it exists) and remove it from the old strip
             Shred moving = fromStrip.get(fromPosition);
             fromStrip.remove(moving);
             if (toPos >= toStrip.size()) { // if it's been moved to off the end of a strip,
                 toStrip.add(moving); // put it at the end of the strip.
-            }
-            else {
+            } else {
                 toStrip.add(toPos, moving); // "move"/add shred to new location
             }
         }
     }
 
-    public void moveStrip(List<Shred> toStrip){
-        if (toStrip == workingStrip && workingStrip.isEmpty()){
+    public void moveStrip(List<Shred> toStrip) {
+        if (toStrip == workingStrip && workingStrip.isEmpty()) {
             workingStrip.addAll(fromStrip);
             completedStrips.remove(fromStrip);
-        }
-        else if (completedStrips.contains(toStrip)){
+        } else if (completedStrips.contains(toStrip)) {
             int fromIndex = completedStrips.indexOf(fromStrip);
             int toIndex = completedStrips.indexOf(toStrip);
             completedStrips.set(toIndex, fromStrip);
@@ -221,33 +218,32 @@ public class DeShredder {
     }
 
 
-    public void save(){
+    public void save() {
         int shredsInRow = completedStrips.get(0).size();
-        int fullNumRows = completedStrips.size()*(int)(Shred.SIZE);
-        int fullNumCols = shredsInRow * (int)(Shred.SIZE);
+        int fullNumRows = completedStrips.size() * (int) (Shred.SIZE);
+        int fullNumCols = shredsInRow * (int) (Shred.SIZE);
         Color[][] fullImg = new Color[fullNumRows][fullNumCols];
 
-        for (int stripNum = 0; stripNum < completedStrips.size(); stripNum++){
-        //for (List<Shred> strip : completedStrips){
+        for (int stripNum = 0; stripNum < completedStrips.size(); stripNum++) {
             List<Shred> strip = completedStrips.get(stripNum);
 
             // if the strip is a different length, stop
-            if (strip.size() != shredsInRow){
+            if (strip.size() != shredsInRow) {
                 UI.println("Please ensure all strips are the same length!");
                 return;
             }
 
-            for (int row=0; row<(int)(Shred.SIZE); row++) {
+            for (int row = 0; row < (int) (Shred.SIZE); row++) {
                 Color[] imgRow = new Color[fullNumCols];
                 for (int shred = 0; shred < strip.size(); shred++) {
                     String shredName = strip.get(shred).toString().substring(3) + ".png";
                     String file = directory.resolve(shredName).toString();
                     Color[][] shredImg = loadImage(file);
-                    for (int col = 0; col < (int)(Shred.SIZE); col++) {
-                        imgRow[shred*(int)(Shred.SIZE)+col] = shredImg[row][col];
+                    for (int col = 0; col < (int) (Shred.SIZE); col++) {
+                        imgRow[shred * (int) (Shred.SIZE) + col] = shredImg[row][col];
                     }
                 }
-                fullImg[stripNum*(int)(Shred.SIZE)+row] = imgRow;
+                fullImg[stripNum * (int) (Shred.SIZE) + row] = imgRow;
             }
         }
         saveImage(fullImg, "test.png");
@@ -261,66 +257,63 @@ public class DeShredder {
     /**
      * Displays the remaining Shreds, the working strip, and all completed strips
      */
-    public void display(){
+    public void display() {
         UI.clearGraphics();
 
         // list of all the remaining shreds that haven't been added to a strip
-        double x=LEFT;
-        for (Shred shred : allShreds){
+        double x = LEFT;
+        for (Shred shred : allShreds) {
             shred.drawWithBorder(x, TOP_ALL);
-            x+=SIZE;
+            x += SIZE;
         }
 
-        //working strip (the one the user is workingly working on)
-        x=LEFT;
-        for (Shred shred : workingStrip){
+        //working strip (the one the user is currently working on)
+        x = LEFT;
+        for (Shred shred : workingStrip) {
             shred.draw(x, TOP_WORKING);
-            x+=SIZE;
+            x += SIZE;
         }
         UI.setColor(Color.red);
-        UI.drawRect(LEFT-1, TOP_WORKING-1, SIZE*workingStrip.size()+2, SIZE+2);
+        UI.drawRect(LEFT - 1, TOP_WORKING - 1, SIZE * workingStrip.size() + 2, SIZE + 2);
         UI.setColor(Color.black);
 
         //completed strips
         double y = TOP_STRIPS;
-        for (List<Shred> strip : completedStrips){
+        for (List<Shred> strip : completedStrips) {
             x = LEFT;
-            for (Shred shred : strip){
+            for (Shred shred : strip) {
                 shred.draw(x, y);
-                x+=SIZE;
+                x += SIZE;
             }
-            UI.drawRect(LEFT-1, y-1, SIZE*strip.size()+2, SIZE+2);
-            y+=SIZE+GAP;
+            UI.drawRect(LEFT - 1, y - 1, SIZE * strip.size() + 2, SIZE + 2);
+            y += SIZE + GAP;
         }
     }
 
     /**
      * Returns which column the mouse position is on.
-     * This will be the index in the list of the shred that the mouse is on, 
+     * This will be the index in the list of the shred that the mouse is on,
      * (or the index of the shred that the mouse would be on if the list were long enough)
      */
-    public int getColumn(double x){
-        return (int) ((x-LEFT)/(SIZE));
+    public int getColumn(double x) {
+        return (int) ((x - LEFT) / (SIZE));
     }
 
     /**
      * Returns the strip that the mouse position is on.
      * This may be the list of all remaining shreds, the working strip, or
-     *  one of the completed strips.
+     * one of the completed strips.
      * If it is not on any strip, then it returns null.
      */
-    public List<Shred> getStrip(double y){
-        int row = (int) ((y-TOP_ALL)/(SIZE+GAP));
-        if (row<=0){
+    public List<Shred> getStrip(double y) {
+        int row = (int) ((y - TOP_ALL) / (SIZE + GAP));
+        if (row <= 0) {
             return allShreds;
-        }
-        else if (row==1){
+        } else if (row == 1) {
             return workingStrip;
-        }
-        else if (row-2<completedStrips.size()){
-            return completedStrips.get(row-2);
-        }
-        else {
+        } else if (row - 2 < completedStrips.size()) {
+            return completedStrips.get(row - 2);
+        } else {
             return null;
         }
     }
@@ -332,7 +325,7 @@ public class DeShredder {
      * Maybe useful for the challenge. Not required for the core or completion.
      */
     public Color[][] loadImage(String imageFileName) {
-        if (imageFileName==null || !Files.exists(Path.of(imageFileName))){
+        if (imageFileName == null || !Files.exists(Path.of(imageFileName))) {
             return null;
         }
         try {
@@ -340,14 +333,16 @@ public class DeShredder {
             int rows = img.getHeight();
             int cols = img.getWidth();
             Color[][] ans = new Color[rows][cols];
-            for (int row = 0; row < rows; row++){
-                for (int col = 0; col < cols; col++){                 
+            for (int row = 0; row < rows; row++) {
+                for (int col = 0; col < cols; col++) {
                     Color c = new Color(img.getRGB(col, row));
                     ans[row][col] = c;
                 }
             }
             return ans;
-        } catch(IOException e){UI.println("Reading Image from "+imageFileName+" failed: "+e);}
+        } catch (IOException e) {
+            UI.println("Reading Image from " + imageFileName + " failed: " + e);
+        }
         return null;
     }
 
@@ -356,20 +351,24 @@ public class DeShredder {
      * From COMP 102 assignment 8&9.
      * Maybe useful for the challenge. Not required for the core or completion.
      */
-    public  void saveImage(Color[][] imageArray, String imageFileName) {
+    public void saveImage(Color[][] imageArray, String imageFileName) {
         int rows = imageArray.length;
         int cols = imageArray[0].length;
         BufferedImage img = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                Color c =imageArray[row][col];
+                Color c = imageArray[row][col];
                 img.setRGB(col, row, c.getRGB());
             }
         }
         try {
-            if (imageFileName==null) { return;}
+            if (imageFileName == null) {
+                return;
+            }
             ImageIO.write(img, "png", Files.newOutputStream(Path.of(imageFileName)));
-        } catch(IOException e){UI.println("Image reading failed: "+e);}
+        } catch (IOException e) {
+            UI.println("Image reading failed: " + e);
+        }
 
     }
 
@@ -377,7 +376,7 @@ public class DeShredder {
      * Creates an object and set up the user interface
      */
     public static void main(String[] args) {
-        DeShredder ds =new DeShredder();
+        DeShredder ds = new DeShredder();
         ds.setupGUI();
 
     }
