@@ -41,7 +41,7 @@ public class DeShredder {
 
     // Constants for the display and the mouse
     public static final double LEFT = 20;       // left side of the display
-    public static final double TOP_ALL = 20;    // top of list of all shreds 
+    public static final double TOP_ALL = 20;    // top of list of all shreds
     public static final double GAP = 5;         // gap between strips
     public static final double SIZE = Shred.SIZE; // size of the shreds
 
@@ -124,8 +124,8 @@ public class DeShredder {
             Shred firstLast = allShreds.get(0);
             allShreds.remove(firstLast);
             allShreds.add(firstLast);
+            display();
         }
-        display();
     }
 
     /**
@@ -190,8 +190,15 @@ public class DeShredder {
 
     // Additional methods to perform the different actions, called by doMouse
 
-    /*# YOUR CODE HERE */
-
+    /**
+     * Moves a shred from one position to another
+     * Does not move if no shred is selected, ie: either from or to positions/strips are null,
+     * or if the strip it is being moved from is actually empty, or if it is being dragged from
+     * beyond the bounds of the strip.
+     *
+     * @param toStrip the strip to move the shred to (can be same as current)
+     * @param toPos   the position in toStrip to move to
+     */
     public void moveShred(List<Shred> toStrip, int toPos) {
         if (fromStrip != null && toStrip != null && !fromStrip.isEmpty() && fromPosition < fromStrip.size()) {
             // find the right shred (if it exists) and remove it from the old strip
@@ -205,6 +212,12 @@ public class DeShredder {
         }
     }
 
+    /**
+     * Swaps the position of one strip with another
+     * Can also move completed strips back to an empty working strip
+     *
+     * @param toStrip the strip to swap the moving strip with
+     */
     public void moveStrip(List<Shred> toStrip) {
         if (toStrip == workingStrip && workingStrip.isEmpty()) {
             workingStrip.addAll(fromStrip);
@@ -217,11 +230,17 @@ public class DeShredder {
         }
     }
 
-
+    /**
+     * Saves completed strips as a PNG image file.
+     * Strips must be the same length in order to save it
+     * Compiles each pixel from the shreds' 2d color arrays into one larger 2d array
+     * Calls saveImage() to save it as a file.
+     */
     public void save() {
+        int size = (int) (Shred.SIZE);
         int shredsInRow = completedStrips.get(0).size();
-        int fullNumRows = completedStrips.size() * (int) (Shred.SIZE);
-        int fullNumCols = shredsInRow * (int) (Shred.SIZE);
+        int fullNumRows = completedStrips.size() * size;
+        int fullNumCols = shredsInRow * size;
         Color[][] fullImg = new Color[fullNumRows][fullNumCols];
 
         for (int stripNum = 0; stripNum < completedStrips.size(); stripNum++) {
@@ -233,17 +252,25 @@ public class DeShredder {
                 return;
             }
 
-            for (int row = 0; row < (int) (Shred.SIZE); row++) {
+            // go row by row in each strip
+            for (int row = 0; row < size; row++) {
                 Color[] imgRow = new Color[fullNumCols];
+
+                // go through all the shreds in the strip
                 for (int shred = 0; shred < strip.size(); shred++) {
                     String shredName = strip.get(shred).toString().substring(3) + ".png";
                     String file = directory.resolve(shredName).toString();
                     Color[][] shredImg = loadImage(file);
-                    for (int col = 0; col < (int) (Shred.SIZE); col++) {
-                        imgRow[shred * (int) (Shred.SIZE) + col] = shredImg[row][col];
+                    // add every pixel from the current row (from all the shreds in the strip) to one array
+                    for (int col = 0; col < size; col++) {
+                        /* make sure the Color/pixel is added in the right place
+                           (may not be the first shred in the strip)*/
+                        imgRow[shred * size + col] = shredImg[row][col];
                     }
                 }
-                fullImg[stripNum * (int) (Shred.SIZE) + row] = imgRow;
+                /* add the row array to the full image 2d array.
+                   make sure it's in the right place as it might not be the first strip anymore */
+                fullImg[stripNum * size + row] = imgRow;
             }
         }
         saveImage(fullImg, "test.png");
