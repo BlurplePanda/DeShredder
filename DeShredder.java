@@ -61,6 +61,7 @@ public class DeShredder {
         UI.addButton("Rotate",         this::rotateList);
         UI.addButton("Shuffle",        this::shuffleList);
         UI.addButton("Complete Strip", this::completeStrip);
+        UI.addButton("Save as PNG",    this::save);
         UI.addButton("Quit",           UI::quit);
 
         UI.setMouseListener(this::doMouse);
@@ -215,6 +216,11 @@ public class DeShredder {
             completedStrips.set(toIndex, fromStrip);
             completedStrips.set(fromIndex, toStrip);
         }
+    }
+
+
+    public void save(){
+
     }
 
     //=============================================================================
