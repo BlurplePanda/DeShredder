@@ -63,6 +63,7 @@ public class DeShredder {
         UI.addButton("Rotate", this::rotateList);
         UI.addButton("Shuffle", this::shuffleList);
         UI.addButton("Complete Strip", this::completeStrip);
+        UI.addButton("Add white padding square", this::addPadding);
         UI.addButton("Save as PNG", this::save);
         UI.addButton("Quit", UI::quit);
 
@@ -277,6 +278,12 @@ public class DeShredder {
         UI.println("Saved");
     }
 
+    public void addPadding(){
+        Shred padding = new BlankShred();
+        workingStrip.add(padding);
+        display();
+    }
+
     //=============================================================================
     // Completed for you. Do not change.
     // loadImage and saveImage may be useful for the challenge.
@@ -408,4 +415,30 @@ public class DeShredder {
 
     }
 
+}
+
+
+class BlankShred extends Shred {
+
+    /**
+     * Construct a new Shred object.
+     * Parameters of Shred are the name of the directory and the id of the image
+     */
+    BlankShred() {
+        super(Path.of(""), 0);
+    }
+
+    @Override
+    public void draw(double left, double top) {
+        UI.setColor(Color.white);
+        UI.fillRect(left, top, SIZE, SIZE);
+    }
+
+    @Override
+    public void drawWithBorder(double left, double top) {
+        UI.setColor(Color.white);
+        UI.fillRect(left, top, SIZE, SIZE);
+        UI.setColor(Color.black);
+        UI.drawRect(left, top, SIZE, SIZE);
+    }
 }
