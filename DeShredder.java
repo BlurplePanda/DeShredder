@@ -205,6 +205,9 @@ public class DeShredder {
             // find the right shred (if it exists) and remove it from the old strip
             Shred moving = fromStrip.get(fromPosition);
             fromStrip.remove(moving);
+            if (moving.toString().equals("ID:0") && toStrip == allShreds){ // if a blank shred is moved to allShreds
+                return; // skip the bit that adds it to the new strip (ie remove it from everything basically)
+            }
             if (toPos >= toStrip.size()) { // if it's been moved to off the end of a strip,
                 toStrip.add(moving); // put it at the end of the strip.
             } else {
@@ -417,7 +420,12 @@ public class DeShredder {
 
 }
 
-
+/**
+ * BlankShred is a Shred object that draws a white rectangle instead of an image
+ * Both Shred draw methods are overridden to achieve this
+ * Passes dummy/unused path and id since path won't be used
+ * Behaves as a Shred (since it is one due to the inheritance)
+ */
 class BlankShred extends Shred {
 
     /**
@@ -425,7 +433,7 @@ class BlankShred extends Shred {
      * Parameters of Shred are the name of the directory and the id of the image
      */
     BlankShred() {
-        super(Path.of(""), 0);
+        super(Path.of(""), 0); // id 0 bc based on other code there'd never normally be a 0.png
     }
 
     @Override
