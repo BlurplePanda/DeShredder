@@ -15,6 +15,7 @@ import java.util.*;
 import java.io.*;
 import java.nio.file.*;
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -55,6 +56,10 @@ public class DeShredder {
 
     private Path directory;
 
+    private JButton toggleSug;
+
+    private boolean suggestions = false;
+
     /**
      * Initialises the UI window, and sets up the buttons.
      */
@@ -63,6 +68,7 @@ public class DeShredder {
         UI.addButton("Rotate", this::rotateList);
         UI.addButton("Shuffle", this::shuffleList);
         UI.addButton("Complete Strip", this::completeStrip);
+        toggleSug = UI.addButton("Suggestions: off", this::toggleSuggestions);
         UI.addButton("Add white padding square", this::addPadding);
         UI.addButton("Save as PNG", this::save);
         UI.addButton("Quit", UI::quit);
@@ -187,6 +193,9 @@ public class DeShredder {
             }
             display();
         }
+        if (suggestions) {
+            suggestShreds();
+        }
     }
 
     // Additional methods to perform the different actions, called by doMouse
@@ -285,6 +294,75 @@ public class DeShredder {
         Shred padding = new BlankShred();
         workingStrip.add(padding);
         display();
+    }
+
+    public void toggleSuggestions() {
+        if (suggestions) {
+            suggestions = false;
+            toggleSug.setText("Suggestions: off");
+        }
+        else {
+            suggestions = true;
+            toggleSug.setText("Suggestions: on");
+            suggestShreds();
+        }
+    }
+
+    public void suggestShreds(){
+            List<Shred> suggested = new ArrayList<>();
+            // use copies of lists so user can still move shreds at same time
+            List<Shred> workingStripCopy = new ArrayList<>(workingStrip);
+            List<Shred> allShredsCopy = new ArrayList<>(allShreds);
+            if (!workingStripCopy.isEmpty()) {
+                // get rightmost column of rightmost shred in working strip
+                Shred current = workingStripCopy.get(workingStripCopy.size() - 1);
+                String currentName = current.toString().substring(3) + ".png";
+                String currentFile = directory.resolve(currentName).toString();
+                Color[][] currentImg = loadImage(currentFile);
+                if (currentImg != null) {
+                    Color[] currentLastCol = new Color[currentImg.length];
+                    for (int row = 0; row < currentImg.length; row++) {
+                        currentLastCol[row] = currentImg[row][currentImg[row].length - 1];
+                    }
+
+                    // check how well each shred in allShreds matches
+                    for (Shred shred : allShredsCopy) {
+                        int matching = 0;
+
+                        // get rightmost column of the shred
+                        String imgName = shred.toString().substring(3) + ".png";
+                        Color[][] checkImg = loadImage(directory.resolve(imgName).toString());
+                        Color[] checkFirstCol = new Color[checkImg.length];
+                        for (int row = 0; row < checkImg.length; row++) {
+                            checkFirstCol[row] = checkImg[row][0];
+                        }
+
+                        // check it against the rightmost column of the last working strip shred
+                        for (int px = 0; px < checkFirstCol.length; px++) {
+                            // doesn't count white pixels as matches
+                            if (checkFirstCol[px].equals(currentLastCol[px]) && !checkFirstCol[px].equals(Color.white)) {
+                                matching++;
+                            }
+                        }
+
+                        // if 5 or more pixels match, it should be suggested
+                        if (matching >= 5) {
+                            suggested.add(shred);
+                        }
+                    }
+
+                    // highlight the suggested shreds with a green border
+                    for (Shred shred : suggested) {
+                        int index = allShredsCopy.indexOf(shred);
+                        double left = LEFT + Shred.SIZE * index;
+                        UI.setColor(Color.green);
+                        UI.setLineWidth(3);
+                        UI.drawRect(left, TOP_ALL, Shred.SIZE, Shred.SIZE);
+                        UI.setLineWidth(1);
+                        UI.setColor(Color.black);
+                    }
+                }
+            }
     }
 
     //=============================================================================
