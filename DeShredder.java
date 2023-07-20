@@ -250,6 +250,9 @@ public class DeShredder {
      * Calls saveImage() to save it as a file.
      */
     public void save() {
+        if (completedStrips.isEmpty()) {
+            return; // don't try and save it if nothing is there to save
+        }
         int size = (int) (Shred.SIZE);
         int shredsInRow = completedStrips.get(0).size();
         int fullNumRows = completedStrips.size() * size;
@@ -273,7 +276,20 @@ public class DeShredder {
                 for (int shred = 0; shred < strip.size(); shred++) {
                     String shredName = strip.get(shred).toString().substring(3) + ".png";
                     String file = directory.resolve(shredName).toString();
-                    Color[][] shredImg = loadImage(file);
+                    Color[][]shredImg;
+                    if (!shredName.equals("0.png")) {
+                        shredImg = loadImage(file);
+                    }
+                    else {
+                        shredImg = new Color[(int) Shred.SIZE][(int) Shred.SIZE];
+                        for (int i = 0; i < Shred.SIZE; i++) {
+                            Color[] whiteRow = new Color[(int) Shred.SIZE];
+                            for (int j = 0; j < Shred.SIZE; j++) {
+                                whiteRow[j] = Color.white;
+                            }
+                            shredImg[i] = whiteRow;
+                        }
+                    }
                     // add every pixel from the current row (from all the shreds in the strip) to one array
                     for (int col = 0; col < size; col++) {
                         /* make sure the Color/pixel is added in the right place
@@ -518,6 +534,7 @@ class BlankShred extends Shred {
     public void draw(double left, double top) {
         UI.setColor(Color.white);
         UI.fillRect(left, top, SIZE, SIZE);
+        UI.setColor(Color.black);
     }
 
     @Override
