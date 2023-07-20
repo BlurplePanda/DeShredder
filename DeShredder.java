@@ -96,9 +96,8 @@ public class DeShredder {
             count = count - 1;
             load(directory, count);   // YOU HAVE TO COMPLETE THE load METHOD
             display();
-            UI.printMessage(""); // clears any "hey choose a file pls" messages
         } catch (NullPointerException e) {
-            UI.printMessage("Please choose a file in the directory you want!");
+            UI.println("Please choose a file in the directory you want!");
         }
     }
 
@@ -140,13 +139,15 @@ public class DeShredder {
      * and redisplay;
      */
     public void shuffleList() {
-        for (Shred shred : allShreds) {
-            Random random = new Random();
-            int randIndex = random.nextInt(allShreds.size());
-            Shred replaced = allShreds.set(randIndex, shred);
-            allShreds.set(allShreds.indexOf(shred), replaced);
+        if (!allShreds.isEmpty()) {
+            for (Shred shred : allShreds) {
+                Random random = new Random();
+                int randIndex = random.nextInt(allShreds.size());
+                Shred replaced = allShreds.set(randIndex, shred);
+                allShreds.set(allShreds.indexOf(shred), replaced);
+            }
+            display();
         }
-        display();
     }
 
     /**
@@ -178,23 +179,25 @@ public class DeShredder {
      * You should not change them.
      */
     public void doMouse(String action, double x, double y) {
-        if (action.equals("pressed")) {
-            fromStrip = getStrip(y);      // the List of shreds to move from (possibly null)
-            fromPosition = getColumn(x);  // the index of the shred to move (may be off the end)
-        }
-        if (action.equals("released")) {
-            List<Shred> toStrip = getStrip(y); // the List of shreds to move to (possibly null)
-            int toPosition = getColumn(x);     // the index to move the shred to (may be off the end)
-            // perform the correct action, depending on the from/to strips/positions
-            if (!completedStrips.contains(fromStrip) && !completedStrips.contains(toStrip)) {
-                moveShred(toStrip, toPosition);
-            } else if (completedStrips.contains(fromStrip) && toStrip != allShreds) {
-                moveStrip(toStrip);
+        if (directory != null) {
+            if (action.equals("pressed")) {
+                fromStrip = getStrip(y);      // the List of shreds to move from (possibly null)
+                fromPosition = getColumn(x);  // the index of the shred to move (may be off the end)
             }
-            display();
-        }
-        if (suggestions) {
-            suggestShreds();
+            if (action.equals("released")) {
+                List<Shred> toStrip = getStrip(y); // the List of shreds to move to (possibly null)
+                int toPosition = getColumn(x);     // the index to move the shred to (may be off the end)
+                // perform the correct action, depending on the from/to strips/positions
+                if (!completedStrips.contains(fromStrip) && !completedStrips.contains(toStrip)) {
+                    moveShred(toStrip, toPosition);
+                } else if (completedStrips.contains(fromStrip) && toStrip != allShreds) {
+                    moveStrip(toStrip);
+                }
+                display();
+            }
+            if (suggestions) {
+                suggestShreds();
+            }
         }
     }
 
@@ -302,14 +305,19 @@ public class DeShredder {
                 fullImg[stripNum * size + row] = imgRow;
             }
         }
-        saveImage(fullImg, "test.png");
+        String name = UI.askString("What would you like to save the image as?\n(\"img\" will save as img.png)");
+        saveImage(fullImg, name+".png");
         UI.println("Saved");
     }
 
     public void addPadding(){
-        Shred padding = new BlankShred();
-        workingStrip.add(padding);
-        display();
+        if (directory != null) { // doesn't let you add padding before you load a folder
+            Shred padding = new BlankShred();
+            workingStrip.add(padding);
+            UI.clearText();
+            UI.println("To remove a padding square:\nDrag it into the top strip of all shreds.");
+            display();
+        }
     }
 
     public void toggleSuggestions() {
@@ -320,6 +328,8 @@ public class DeShredder {
         else {
             suggestions = true;
             toggleSug.setText("Suggestions: on");
+            UI.clearText();
+            UI.println("Disclaimer: Suggestions may not function correctly for text documents.");
             suggestShreds();
         }
     }
