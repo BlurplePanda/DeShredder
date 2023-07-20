@@ -239,10 +239,9 @@ public class DeShredder {
             workingStrip.addAll(fromStrip);
             completedStrips.remove(fromStrip);
         } else if (completedStrips.contains(toStrip)) {
-            int fromIndex = completedStrips.indexOf(fromStrip);
             int toIndex = completedStrips.indexOf(toStrip);
-            completedStrips.set(toIndex, fromStrip);
-            completedStrips.set(fromIndex, toStrip);
+            completedStrips.remove(fromStrip);
+            completedStrips.add(toIndex, fromStrip);
         }
     }
 
