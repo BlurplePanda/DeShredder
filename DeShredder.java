@@ -217,7 +217,7 @@ public class DeShredder {
             // find the right shred (if it exists) and remove it from the old strip
             Shred moving = fromStrip.get(fromPosition);
             fromStrip.remove(moving);
-            if (moving.toString().equals("ID:0") && toStrip == allShreds){ // if a blank shred is moved to allShreds
+            if (moving.toString().equals("ID:0") && toStrip == allShreds) { // if a blank shred is moved to allShreds
                 return; // skip the bit that adds it to the new strip (ie remove it from everything basically)
             }
             if (toPos >= toStrip.size()) { // if it's been moved to off the end of a strip,
@@ -278,11 +278,10 @@ public class DeShredder {
                 for (int shred = 0; shred < strip.size(); shred++) {
                     String shredName = strip.get(shred).toString().substring(3) + ".png";
                     String file = directory.resolve(shredName).toString();
-                    Color[][]shredImg;
+                    Color[][] shredImg;
                     if (!shredName.equals("0.png")) {
                         shredImg = loadImage(file);
-                    }
-                    else {
+                    } else {
                         shredImg = new Color[(int) Shred.SIZE][(int) Shred.SIZE];
                         for (int i = 0; i < Shred.SIZE; i++) {
                             Color[] whiteRow = new Color[(int) Shred.SIZE];
@@ -305,11 +304,11 @@ public class DeShredder {
             }
         }
         String name = UI.askString("What would you like to save the image as?\n(\"img\" will save as img.png)");
-        saveImage(fullImg, name+".png");
+        saveImage(fullImg, name + ".png");
         UI.println("Saved");
     }
 
-    public void addPadding(){
+    public void addPadding() {
         if (directory != null) { // doesn't let you add padding before you load a folder
             Shred padding = new BlankShred();
             workingStrip.add(padding);
@@ -323,8 +322,7 @@ public class DeShredder {
         if (suggestions) {
             suggestions = false;
             toggleSug.setText("Suggestions: off");
-        }
-        else {
+        } else {
             suggestions = true;
             toggleSug.setText("Suggestions: on");
             UI.clearText();
@@ -333,61 +331,62 @@ public class DeShredder {
         }
     }
 
-    public void suggestShreds(){
-            List<Shred> suggested = new ArrayList<>();
-            // use copies of lists so user can still move shreds at same time
-            List<Shred> workingStripCopy = new ArrayList<>(workingStrip);
-            List<Shred> allShredsCopy = new ArrayList<>(allShreds);
-            if (!workingStripCopy.isEmpty()) {
-                // get rightmost column of rightmost shred in working strip
-                Shred current = workingStripCopy.get(workingStripCopy.size() - 1);
-                String currentName = current.toString().substring(3) + ".png";
-                String currentFile = directory.resolve(currentName).toString();
-                Color[][] currentImg = loadImage(currentFile);
-                if (currentImg != null) {
-                    Color[] currentLastCol = new Color[currentImg.length];
-                    for (int row = 0; row < currentImg.length; row++) {
-                        currentLastCol[row] = currentImg[row][currentImg[row].length - 1];
+    public void suggestShreds() {
+        List<Shred> suggested = new ArrayList<>();
+        // use copies of lists so user can still move shreds at same time
+        List<Shred> workingStripCopy = new ArrayList<>(workingStrip);
+        List<Shred> allShredsCopy = new ArrayList<>(allShreds);
+
+        if (!workingStripCopy.isEmpty()) {
+            // get rightmost column of rightmost shred in working strip
+            Shred current = workingStripCopy.get(workingStripCopy.size() - 1);
+            String currentName = current.toString().substring(3) + ".png";
+            String currentFile = directory.resolve(currentName).toString();
+            Color[][] currentImg = loadImage(currentFile);
+            if (currentImg != null) {
+                Color[] currentLastCol = new Color[currentImg.length];
+                for (int row = 0; row < currentImg.length; row++) {
+                    currentLastCol[row] = currentImg[row][currentImg[row].length - 1];
+                }
+
+                // check how well each shred in allShreds matches
+                for (Shred shred : allShredsCopy) {
+                    int matching = 0;
+
+                    // get rightmost column of the shred
+                    String imgName = shred.toString().substring(3) + ".png";
+                    Color[][] checkImg = loadImage(directory.resolve(imgName).toString());
+                    Color[] checkFirstCol = new Color[checkImg.length];
+                    for (int row = 0; row < checkImg.length; row++) {
+                        checkFirstCol[row] = checkImg[row][0];
                     }
 
-                    // check how well each shred in allShreds matches
-                    for (Shred shred : allShredsCopy) {
-                        int matching = 0;
-
-                        // get rightmost column of the shred
-                        String imgName = shred.toString().substring(3) + ".png";
-                        Color[][] checkImg = loadImage(directory.resolve(imgName).toString());
-                        Color[] checkFirstCol = new Color[checkImg.length];
-                        for (int row = 0; row < checkImg.length; row++) {
-                            checkFirstCol[row] = checkImg[row][0];
-                        }
-
-                        // check it against the rightmost column of the last working strip shred
-                        for (int px = 0; px < checkFirstCol.length; px++) {
-                            // doesn't count white pixels as matches
-                            if (checkFirstCol[px].equals(currentLastCol[px]) && !checkFirstCol[px].equals(Color.white)) {
-                                matching++;
-                            }
-                        }
-
-                        // if 5 or more pixels match, it should be suggested
-                        if (matching >= 5) {
-                            suggested.add(shred);
+                    // check it against the rightmost column of the last working strip shred
+                    for (int px = 0; px < checkFirstCol.length; px++) {
+                        // doesn't count white pixels as matches
+                        if (checkFirstCol[px].equals(currentLastCol[px]) && !checkFirstCol[px].equals(Color.white)) {
+                            matching++;
                         }
                     }
 
-                    // highlight the suggested shreds with a green border
-                    for (Shred shred : suggested) {
-                        int index = allShredsCopy.indexOf(shred);
-                        double left = LEFT + Shred.SIZE * index;
-                        UI.setColor(Color.green);
-                        UI.setLineWidth(3);
-                        UI.drawRect(left, TOP_ALL, Shred.SIZE, Shred.SIZE);
-                        UI.setLineWidth(1);
-                        UI.setColor(Color.black);
+                    // if 5 or more pixels match, it should be suggested
+                    if (matching >= 5) {
+                        suggested.add(shred);
                     }
                 }
+
+                // highlight the suggested shreds with a green border
+                for (Shred shred : suggested) {
+                    int index = allShredsCopy.indexOf(shred);
+                    double left = LEFT + Shred.SIZE * index;
+                    UI.setColor(Color.green);
+                    UI.setLineWidth(3);
+                    UI.drawRect(left, TOP_ALL, Shred.SIZE, Shred.SIZE);
+                    UI.setLineWidth(1);
+                    UI.setColor(Color.black);
+                }
             }
+        }
     }
 
     //=============================================================================
